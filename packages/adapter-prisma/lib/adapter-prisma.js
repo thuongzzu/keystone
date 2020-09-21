@@ -454,8 +454,13 @@ class PrismaListAdapter extends BaseListAdapter {
         return { [condition]: processRelClause(condition, value) };
       } else {
         // See if any of our fields know what to do with this condition
-        const path = condition.split('_')[0];
-        let fieldAdapter = this.fieldAdaptersByPath[path];
+        let dbPath = condition;
+        let fieldAdapter = this.fieldAdaptersByPath[dbPath];
+        while (!fieldAdapter && dbPath.includes('_')) {
+          dbPath = dbPath.split('_').slice(0, -1).join('_');
+          fieldAdapter = this.fieldAdaptersByPath[dbPath];
+        }
+
         // FIXME: ask the field adapter if it supports the condition type
         const supported =
           fieldAdapter && fieldAdapter.getQueryConditions(fieldAdapter.dbPath)[condition];
